@@ -1,12 +1,14 @@
 {
-    "name": "optimus/laravel-boilerplate",
+    "name": "optimus/fineuploader-server-cloudinary",
     "autoload": {
         "psr-4": {
-            "Optimus\\LaravelBoilerplate\\": "src/"
+            "Optimus\\FineuploaderServer\\Storage\\": "src/"
         }
     },
     "require": {
-        "laravel/framework": "~5.1"
+        "laravel/framework": "~5.1",
+        "optimus/fineuploader-server": "0.1.*",
+        "cloudinary/cloudinary_php": "dev-master"
     },
     "require-dev": {
         "mockery/mockery": "0.9.*",
