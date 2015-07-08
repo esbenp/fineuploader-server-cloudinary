@@ -2,7 +2,7 @@
     "name": "optimus/fineuploader-server-cloudinary",
     "autoload": {
         "psr-4": {
-            "Optimus\\FineuploaderServer\\Storage\\": "src/"
+            "Optimus\\FineuploaderServer\\": "src/"
         }
     },
     "require": {
