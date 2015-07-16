@@ -134,7 +134,7 @@ class CloudinaryStorage implements StorageInterface {
         try {
             $response = Uploader::rename($from, $to);
 
-            return true;
+            return $response;
         } catch(Cloudinary\Error $e) {
             return [
                 'error' => 'M0001'
