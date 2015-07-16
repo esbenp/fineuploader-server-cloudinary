@@ -40,7 +40,8 @@ class CloudinaryStorage implements StorageInterface {
     {
         $response = $this->upload($file->getPathname(), $path);
 
-        $file->setName($response['public_id']);
+        // Resolves to upload path, e.g. users/1/adsadasd.jpg
+        $file->setName(sprintf('%s.%s', $response['public_id'], $file->getExtension()));
         $file->setUrl($response['secure_url']);
         // Set the type here, otherwise getType will be called after the temp
         // file has been deleted.
