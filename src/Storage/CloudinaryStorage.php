@@ -42,23 +42,35 @@ class CloudinaryStorage implements StorageInterface {
 
         $file->setName($response['public_id']);
         $file->setUrl($response['secure_url']);
+        // Set the type here, otherwise getType will be called after the temp
+        // file has been deleted.
+        $file->setType($response['resource_type'] === 'image' ? 'image' : 'file');
 
-        if (isset($this->config['editions']) && is_array($this->config['editions'])) {
-            foreach($this->config['editions'] as $key => $edition) {
-                $edition = new Edition($key, null, $path, [
-                    'type' => 'image',
-                    'height' => $edition['height'],
-                    'width' => $edition['width'],
-                    'crop' => $edition['crop'],
-                    'cloudinary_response' => $response
-                ], false);
+        if (!isset($this->config['editions']) || !is_array($this->config['editions'])) {
+            $this->config['editions'] = [];
+        }
 
-                $url = $this->resolveUrl($edition);
+        $thumbnailsConfig = $this->uploaderConfig->get('thumbnails');
+        $this->config['editions']['thumbnail'] = [
+            'crop' => $thumbnailsConfig['crop'],
+            'height' => $thumbnailsConfig['height'],
+            'width' => $thumbnailsConfig['width']
+        ];
 
-                $edition->setUrl($url);
+        foreach($this->config['editions'] as $key => $edition) {
+            $edition = new Edition($key, null, $path, [
+                'type' => 'image',
+                'height' => $edition['height'],
+                'width' => $edition['width'],
+                'crop' => $edition['crop'],
+                'cloudinary_response' => $response
+            ], false);
 
-                $file->addEdition($edition);
-            }
+            $url = $this->resolveUrl($edition);
+
+            $edition->setUrl($url);
+
+            $file->addEdition($edition);
         }
 
         return $file;
