@@ -129,6 +129,19 @@ class CloudinaryStorage implements StorageInterface {
         }
     }
 
+    public function move($from, $to)
+    {
+        try {
+            $response = Uploader::rename($from, $to);
+
+            return true;
+        } catch(Cloudinary\Error $e) {
+            return [
+                'error' => 'M0001'
+            ];
+        }
+    }
+
     public function __destruct()
     {
         Cloudinary::reset_config();
