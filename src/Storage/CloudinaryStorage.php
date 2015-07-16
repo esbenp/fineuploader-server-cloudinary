@@ -43,20 +43,22 @@ class CloudinaryStorage implements StorageInterface {
         $file->setName($response['public_id']);
         $file->setUrl($response['secure_url']);
 
-        foreach($this->config['editions'] as $key => $edition) {
-            $edition = new Edition($key, null, $path, [
-                'type' => 'image',
-                'height' => $edition['height'],
-                'width' => $edition['width'],
-                'crop' => $edition['crop'],
-                'cloudinary_response' => $response
-            ], false);
+        if (isset($this->config['editions']) && is_array($this->config['editions'])) {
+            foreach($this->config['editions'] as $key => $edition) {
+                $edition = new Edition($key, null, $path, [
+                    'type' => 'image',
+                    'height' => $edition['height'],
+                    'width' => $edition['width'],
+                    'crop' => $edition['crop'],
+                    'cloudinary_response' => $response
+                ], false);
 
-            $url = $this->resolveUrl($edition);
+                $url = $this->resolveUrl($edition);
 
-            $edition->setUrl($url);
+                $edition->setUrl($url);
 
-            $file->addEdition($edition);
+                $file->addEdition($edition);
+            }
         }
 
         return $file;
