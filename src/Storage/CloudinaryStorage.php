@@ -5,8 +5,10 @@ namespace Optimus\FineuploaderServer\Storage;
 use Cloudinary;
 use Cloudinary\Api;
 use Cloudinary\Uploader;
+use Optimus\FineuploaderServer\Config\Config;
 use Optimus\FineuploaderServer\File\File;
 use Optimus\FineuploaderServer\File\Edition;
+use Optimus\FineuploaderServer\File\RootFile;
 use Optimus\FineuploaderServer\Storage\UrlResolverTrait;
 
 class CloudinaryStorage implements StorageInterface {
@@ -15,13 +17,16 @@ class CloudinaryStorage implements StorageInterface {
 
     private $config;
 
+    private $uploaderConfig;
+
     private $cloudinary;
 
     private $urlResolver;
 
-    public function __construct(array $config, $urlResolver)
+    public function __construct(array $config, Config $uploaderConfig, $urlResolver)
     {
         $this->config = $this->mergeConfigWithDefault($config);
+        $this->uploaderConfig = $uploaderConfig;
         $this->urlResolver = $urlResolver;
 
         Cloudinary::config([
@@ -60,15 +65,53 @@ class CloudinaryStorage implements StorageInterface {
     // Filename should be equal the public id
     public function delete($filename)
     {
-        $api = new Cloudinary\Api();
-        $response = $api->delete_resources($filename)['deleted'][$filename];
+        $file = new RootFile($filename);
+        $public_id = str_replace('.'.$file->getExtension(), '', $filename);
 
-        if ($response !== 'deleted') {
+        $api = new Cloudinary\Api();
+        $response = $api->delete_resources($public_id);
+
+        if ($response['deleted'][$public_id] !== 'deleted') {
             http_response_code(404);
             exit;
         }
 
         return true;
+    }
+
+    public function get(RootFile $file)
+    {
+        try {
+            $api = new Api();
+            $result = $api->resource(
+                sprintf('%s/%s',
+                $file->getUploaderPath(),
+                $file->getBasename('.'.$file->getExtension()))
+            );
+
+            $file->setType($result['resource_type'] === 'image' ? 'image' : 'file');
+
+            if ($result['resource_type'] === 'image') {
+                $config = $this->uploaderConfig->get('thumbnails');
+
+                $edition = new Edition("thumbnail", null, $file->getUploaderPath(), [
+                    'type' => 'image',
+                    'height' => $config['height'],
+                    'width' => $config['width'],
+                    'crop' => $config['crop'],
+                    'cloudinary_response' => $result
+                ], true);
+                $edition->setUrl($this->resolveUrl($edition));
+
+                $file->addEdition($edition);
+            }
+
+            return $file;
+        } catch(Api\NotFound $e) {
+            return [
+                'error' => 'S0001' // session root file does not exist
+            ];
+        }
     }
 
     public function __destruct()
