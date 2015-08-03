@@ -86,11 +86,6 @@ class CloudinaryStorage implements StorageInterface {
         $api = new Cloudinary\Api();
         $response = $api->delete_resources($public_id);
 
-        if ($response['deleted'][$public_id] !== 'deleted') {
-            http_response_code(404);
-            exit;
-        }
-
         return true;
     }
 
