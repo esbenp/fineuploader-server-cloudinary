@@ -146,7 +146,8 @@ class CloudinaryStorage implements StorageInterface {
     {
         return Uploader::upload($file, [
             'folder' => $path,
-            'eager' => array_values($this->config['eager'])
+            'eager' => array_values($this->config['eager']),
+            'resource_type' => 'auto'
         ]);
     }
 
