@@ -21,7 +21,9 @@ class CloudinaryUrlResolver implements UrlResolverInterface {
 
         $parametersArray['secure'] = true;
         $parametersArray['version'] = $cloudinaryResponse['version'];
-        $parametersArray['format'] = $cloudinaryResponse['format'];
+        if ($cloudinaryResponse['resource_type'] === 'image') {
+            $parametersArray['format'] = $cloudinaryResponse['format'];
+        }
 
         return cloudinary_url($cloudinaryResponse['public_id'], $parametersArray);
     }
