@@ -5,5 +5,5 @@
 ## Installation
 
 ```bash
-composer require optimus/fineuploader-server-cloudinary 0.2.*
+composer require optimus/fineuploader-server-cloudinary 0.3.*
 ```
