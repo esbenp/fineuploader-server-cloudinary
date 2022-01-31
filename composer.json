@@ -8,7 +8,7 @@
     "require": {
         "laravel/framework": "~6.0|~7.0|~8.0",
         "optimus/fineuploader-server": "0.4.*",
-        "cloudinary/cloudinary_php": "~1.1"
+        "cloudinary/cloudinary_php": "~2.6"
     },
     "require-dev": {
         "mockery/mockery": "0.9.*",

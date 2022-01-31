@@ -2,9 +2,9 @@
 
 namespace Optimus\FineuploaderServer\Storage;
 
-use Cloudinary;
-use Cloudinary\Api;
-use Cloudinary\Uploader;
+use Cloudinary\Configuration\Configuration;
+use Cloudinary\Api\Admin\AdminApi;
+use Cloudinary\Api\Upload\UploadApi;
 use Optimus\FineuploaderServer\Config\Config;
 use Optimus\FineuploaderServer\File\File;
 use Optimus\FineuploaderServer\File\Edition;
@@ -29,10 +29,12 @@ class CloudinaryStorage implements StorageInterface {
         $this->uploaderConfig = $uploaderConfig;
         $this->urlResolver = $urlResolver;
 
-        Cloudinary::config([
-            'cloud_name' => $config['cloud_name'],
-            'api_key' => $config['api_key'],
-            'api_secret' => $config['api_secret']
+        Configuration::instance([
+            'cloud' => [
+                'cloud_name' => $config['cloud_name'],
+                'api_key' => $config['api_key'],
+                'api_secret' => $config['api_secret']
+            ]
         ]);
     }
 
@@ -83,8 +85,8 @@ class CloudinaryStorage implements StorageInterface {
         $file = new RootFile($filename);
         $public_id = str_replace('.'.$file->getExtension(), '', $filename);
 
-        $api = new Cloudinary\Api();
-        $response = $api->delete_resources($public_id);
+        $api = new AdminApi();
+        $response = $api->deleteAssets($public_id);
 
         return true;
     }
@@ -92,8 +94,8 @@ class CloudinaryStorage implements StorageInterface {
     public function get(RootFile $file)
     {
         try {
-            $api = new Api();
-            $result = $api->resource(
+            $api = new AdminApi();
+            $result = $api->asset(
                 sprintf('%s/%s',
                 $file->getUploaderPath(),
                 $file->getBasename('.'.$file->getExtension()))
@@ -127,7 +129,8 @@ class CloudinaryStorage implements StorageInterface {
     public function move($from, $to)
     {
         try {
-            $response = Uploader::rename($from, $to);
+            $uploader = new UploadApi();
+            $response = $uploader->rename($from, $to);
 
             return $response;
         } catch(Cloudinary\Error $e) {
@@ -137,14 +140,10 @@ class CloudinaryStorage implements StorageInterface {
         }
     }
 
-    public function __destruct()
-    {
-        Cloudinary::reset_config();
-    }
-
     private function upload($file, $path)
     {
-        return Uploader::upload($file, [
+        $uploader = new UploadApi();
+        return $uploader->upload($file, [
             'folder' => $path,
             'eager' => array_values($this->config['eager']),
             'resource_type' => 'auto'
