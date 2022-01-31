@@ -2,6 +2,7 @@
 
 namespace Optimus\FineuploaderServer\Http;
 
+use Cloudinary\Asset\Media;
 use Optimus\FineuploaderServer\File\File;
 use Optimus\FineuploaderServer\Http\UrlResolverInterface;
 
@@ -25,7 +26,7 @@ class CloudinaryUrlResolver implements UrlResolverInterface {
             $parametersArray['format'] = $cloudinaryResponse['format'];
         }
 
-        return cloudinary_url($cloudinaryResponse['public_id'], $parametersArray);
+        return Media::fromParams($cloudinaryResponse['public_id'], $parametersArray);
     }
 
     private function generateParametersArray(File $file)
